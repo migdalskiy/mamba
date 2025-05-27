@@ -35,6 +35,7 @@ def create_block(
     norm_epsilon=1e-5,
     rms_norm=False,
     residual_in_fp32=False,
+    dropout = 0.5,
     fused_add_norm=False,
     layer_idx=None,
     device=None,
@@ -77,6 +78,7 @@ def create_block(
         norm_cls=norm_cls,
         fused_add_norm=fused_add_norm,
         residual_in_fp32=residual_in_fp32,
+        dropout = dropout
     )
     block.layer_idx = layer_idx
     return block
@@ -130,6 +132,7 @@ class MixerModel(nn.Module):
         initializer_cfg=None,
         fused_add_norm=False,
         residual_in_fp32=False,
+        dropout=0.5,
         device=None,
         dtype=None,
     ) -> None:
@@ -160,6 +163,7 @@ class MixerModel(nn.Module):
                     norm_epsilon=norm_epsilon,
                     rms_norm=rms_norm,
                     residual_in_fp32=residual_in_fp32,
+                    dropout = dropout,
                     fused_add_norm=fused_add_norm,
                     layer_idx=i,
                     **factory_kwargs,
@@ -250,6 +254,7 @@ class MambaLMHeadModel(nn.Module, GenerationMixin):
             initializer_cfg=initializer_cfg,
             fused_add_norm=fused_add_norm,
             residual_in_fp32=residual_in_fp32,
+            dropout = config.dropout,
             **factory_kwargs,
         )
         self.lm_head = nn.Linear(d_model, vocab_size, bias=False, **factory_kwargs)
