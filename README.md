@@ -11,6 +11,12 @@
 > Tri Dao*, Albert Gu*\
 > Paper: https://arxiv.org/abs/2405.21060
 
+![Mamba-3](assets/mamba3.png "Inference-first State Space Model")
+> **Mamba-3: Improved Sequence Modeling using State Space Principles**\
+>     **Through Structured State Space Duality**\
+> Aakash Lahoti*, Kevin Y. Li*, Berlin Chen*, Caitlin Wang*, Aviv Bick, J. Zico Kolter, Tri Dao†, Albert Gu†\
+> Paper: https://arxiv.org/abs/2603.15569
+
 ## About
 
 Mamba is a new state space model architecture showing promising performance on information-dense data such as language modeling, where previous subquadratic models fall short of Transformers.
@@ -19,14 +25,14 @@ with an efficient hardware-aware design and implementation in the spirit of [Fla
 
 ## Installation
 
-- [Option] `pip install causal-conv1d>=1.4.0`: an efficient implementation of a simple causal Conv1d layer used inside the Mamba block.
-- `pip install mamba-ssm`: the core Mamba package.
-- `pip install mamba-ssm[causal-conv1d]`: To install core Mamba package and causal-conv1d.
-- `pip install mamba-ssm[dev]`: To install core Mamba package and dev depdencies.
+Install PyTorch first, then:
+- [Option] `pip install causal-conv1d>=1.4.0 --no-build-isolation`: an efficient implementation of a simple causal Conv1d layer used inside the Mamba block.
+- `pip install mamba-ssm --no-build-isolation`: the core Mamba package.
+- `pip install mamba-ssm[causal-conv1d] --no-build-isolation`: To install core Mamba package and causal-conv1d.
 
-It can also be built from source with `pip install .` from this repository.
+`--no-build-isolation` is required so that pip uses your existing CUDA-enabled PyTorch instead of installing torch-cpu in an isolated build environment.
 
-Try passing `--no-build-isolation` to `pip` if installation encounters difficulties either when building from source or installing from PyPi. Common `pip` complaints that can be resolved in this way include PyTorch versions, but other cases exist as well.
+NOTE: To use Mamba-3, please install from source `MAMBA_FORCE_BUILD=TRUE pip install --no-cache-dir --force-reinstall git+https://github.com/state-spaces/mamba.git --no-build-isolation`.
 
 Other requirements:
 - Linux
@@ -94,6 +100,30 @@ assert y.shape == x.shape
 
 A minimal version of the inner SSD module (Listing 1 from the Mamba-2 paper) with conversion between "discrete" and "continuous" SSM versions
 is at [modules/ssd_minimal.py](mamba_ssm/modules/ssd_minimal.py).
+
+### Mamba-3
+
+The Mamba-3 block is implemented at [modules/mamba3.py](mamba_ssm/modules/mamba3.py).
+
+The usage is as follows:
+``` python
+from mamba_ssm import Mamba3
+batch, length, dim = 2, 2048, 768
+x = torch.randn(batch, length, dim).to(torch.bfloat16).to("cuda")
+model = Mamba3(
+    # This module uses roughly 6 * d_model^2 parameters
+    d_model=dim, # Model dimension d_model
+    d_state=128,  # SSM state size
+    headdim=64, # SSM headdim
+    is_mimo=True, # Use MIMO mode
+    mimo_rank=4, # MIMO rank when is_mimo=True
+    chunk_size=16, # 64/mimo_rank if x is in bf16, else 32/mimo_rank
+    is_outproj_norm=False, # Additional post SSM norm
+    dtype=torch.bfloat16,
+).to("cuda")
+y = model(x)
+assert y.shape == x.shape
+```
 
 ### Mamba Language Model
 
@@ -240,4 +270,13 @@ If you use this codebase, or otherwise find our work valuable, please cite Mamba
   year={2024}
 }
 
+@misc{lahoti2026mamba3improvedsequencemodeling,
+      title={Mamba-3: Improved Sequence Modeling using State Space Principles}, 
+      author={Aakash Lahoti and Kevin Y. Li and Berlin Chen and Caitlin Wang and Aviv Bick and J. Zico Kolter and Tri Dao and Albert Gu},
+      year={2026},
+      eprint={2603.15569},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2603.15569}, 
+}
 ```

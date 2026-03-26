@@ -17,7 +17,9 @@ classifiers = [
 ]
 dependencies = [
     "torch",
-    "triton",
+    "tilelang==0.1.8",
+    "quack-kernels==0.3.1",
+    "triton>=3.5.0",
     "ninja",
     "einops",
     "transformers",
@@ -37,10 +39,13 @@ dev = [
 
 
 [build-system]
+# torch is intentionally excluded: pip's build isolation would install
+# torch-cpu from PyPI, ignoring the user's CUDA-enabled torch.
+# Users building from source should install torch first, then:
+#   pip install mamba-ssm --no-build-isolation
 requires = [
     "setuptools>=61.0.0",
     "wheel",
-    "torch",
     "packaging",
     "ninja",
 ]
