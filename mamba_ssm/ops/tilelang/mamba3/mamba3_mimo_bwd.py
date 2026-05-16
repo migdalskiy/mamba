@@ -6,6 +6,7 @@ Copyright (c) 2026, Dao AI Lab, Goombalab
 
 """
 
+import math
 import torch
 import tilelang
 import tilelang.language as T
@@ -59,6 +60,7 @@ def mamba_mimo_bwd_fwd(
     accum_dtype = 'float32'
 
     nchunks = tilelang.cdiv(S, chunk_size)
+    tail_len = S % chunk_size
     fused_chunk_size = chunk_size * R
 
     if reduceO:
@@ -469,7 +471,10 @@ def mamba_mimo_bwd_fwd(
 
                 # DA_CS(last) applies chunk-level decay to the carried state.
                 da_cs_sum = T.alloc_var(T.float32)
-                T.copy(DA_CS[i_b, i_h, chunk_start+chunk_size-1], da_cs_sum)
+                if tail_len > 0 and i == nchunks - 1:
+                    T.copy(DA_CS[i_b, i_h, S - 1], da_cs_sum)
+                else:
+                    T.copy(DA_CS[i_b, i_h, chunk_start+chunk_size-1], da_cs_sum)
                 for n, p in T.Parallel(N, P):
                     states_frag[n, p] *= T.exp(da_cs_sum)
                 T.gemm(k_state_frag, PsiV_shared, states_frag, transpose_A=True, clear_accum=False)
@@ -518,6 +523,7 @@ def mamba_mimo_bwd_bwd(
     accum_dtype = 'float32'
 
     nchunks = tilelang.cdiv(S, chunk_size)
+    tail_len = S % chunk_size
     fused_chunk_size = chunk_size * R
 
     if reduceO:
@@ -996,7 +1002,10 @@ def mamba_mimo_bwd_bwd(
                 ddA_state_passing = T.alloc_fragment([1], T.float32)
                 ddA_state_passing_prereduce_frag = T.alloc_fragment([N, P], T.float32)
                 da_cs_sum = T.alloc_var(T.float32)
-                T.copy(DA_CS[i_b, i_h, chunk_start+chunk_size-1], da_cs_sum)
+                if tail_len > 0 and chunk_idx == nchunks - 1:
+                    T.copy(DA_CS[i_b, i_h, S - 1], da_cs_sum)
+                else:
+                    T.copy(DA_CS[i_b, i_h, chunk_start+chunk_size-1], da_cs_sum)
                 for n, p in T.Parallel(N, P):
                     ddA_state_passing_prereduce_frag[n, p] = (
                         states_frag[n, p] 
@@ -1123,7 +1132,10 @@ def mamba_mimo_bwd_bwd(
 
                 # --- Update Reverse-Passed State Gradient ---
                 da_cs_sum_dstates = T.alloc_var(T.float32)
-                T.copy(DA_CS[i_b, i_h, chunk_start+chunk_size-1], da_cs_sum_dstates)
+                if tail_len > 0 and chunk_idx == nchunks - 1:
+                    T.copy(DA_CS[i_b, i_h, S - 1], da_cs_sum_dstates)
+                else:
+                    T.copy(DA_CS[i_b, i_h, chunk_start+chunk_size-1], da_cs_sum_dstates)
                 for n, p in T.Parallel(N, P):
                     dstates_frag[n, p] *= T.exp(da_cs_sum_dstates)
                 dPhiO_scaled_frag = T.alloc_fragment([fused_chunk_size, P], dtype)
@@ -1175,7 +1187,7 @@ def mamba_mimo_bwd_combined(
     reduceO = mimo_o is not None
 
     dmimo_o = torch.empty([B, H, R, P], dtype=mimo_v.dtype, device=mimo_v.device) if reduceO else None
-    states = torch.empty([B, H, S//chunk_size, N, P], dtype=v.dtype, device=v.device) # NOTE: states dtype is set to v.dtype
+    states = torch.empty([B, H, math.ceil(S/chunk_size), N, P], dtype=v.dtype, device=v.device) # NOTE: states dtype is set to v.dtype
     
     if z is not None:
         dz_tilelang = torch.empty_like(v)
@@ -1190,15 +1202,22 @@ def mamba_mimo_bwd_combined(
         dtype_str = str(dtype).replace("torch.", "")
     else:
         dtype_str = dtype
-    bwd_fwd_kernel = mamba_mimo_bwd_fwd(B, S, H, G, N, P, R, 
-                                             z is not None,
-                                             D is not None,
-                                             reduceO,
-                                             chunk_size, 
-                                             rotary_dim_divisor,
-                                             dtype_str,
-                                             bf_threads,
-                                             bf_num_stages)
+    bwd_fwd_kernel = mamba_mimo_bwd_fwd(
+        T.dynamic("B"),
+        T.dynamic("S"), 
+        T.dynamic("H"), 
+        T.dynamic("G"), 
+        N, P, R, 
+        z is not None,
+        D is not None,
+        reduceO,
+        chunk_size, 
+        rotary_dim_divisor,
+        dtype_str,
+        bf_threads,
+        bf_num_stages
+    )
+
     bwd_fwd_kernel(
                     dout,
                     q, 
@@ -1236,20 +1255,26 @@ def mamba_mimo_bwd_combined(
     dfactor = torch.zeros([B, H, S], dtype=torch.float32, device=trap.device)
     dgamma_diag = torch.zeros([B, H, S], dtype=torch.float32, device=trap.device)
     ddA = torch.zeros([B, H, S], dtype=torch.float32, device=dt.device)
-    dSSdA = torch.zeros([B, H, S//chunk_size, chunk_size, chunk_size], dtype=torch.float32, device=dt.device)
+    dSSdA = torch.zeros([B, H, math.ceil(S/chunk_size), chunk_size, chunk_size], dtype=torch.float32, device=dt.device)
     ddA_cs_rev = torch.zeros([B, H, S], dtype=torch.float32, device=dt.device)
     ddA_cs = torch.zeros([B, H, S], dtype=torch.float32, device=dt.device)
     
     
-    bwd_bwd_kernel = mamba_mimo_bwd_bwd(B, S, H, G, N, P, R, 
-                                             z is not None,
-                                             D is not None,
-                                             reduceO,
-                                             chunk_size, 
-                                             rotary_dim_divisor,
-                                             dtype_str,
-                                             bb_threads,
-                                             bb_num_stages)
+    bwd_bwd_kernel = mamba_mimo_bwd_bwd(
+        T.dynamic("B"),
+        T.dynamic("S"), 
+        T.dynamic("H"), 
+        T.dynamic("G"), 
+        N, P, R, 
+        z is not None,
+        D is not None,
+        reduceO,
+        chunk_size, 
+        rotary_dim_divisor,
+        dtype_str,
+        bb_threads,
+        bb_num_stages)
+
     bwd_bwd_kernel(
             dout,
             q, 

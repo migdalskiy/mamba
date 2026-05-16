@@ -14,7 +14,6 @@ try:
 except ImportError:
     mamba3_mimo_combined = None
 
-from mamba_ssm.ops.triton.angle_cumsum import angle_dt
 from mamba_ssm.ops.triton.mamba3.mamba3_siso_combined import mamba3_siso_combined
 
 from mamba_ssm.ops.triton.mamba3.mamba3_mimo_rotary_step import apply_rotary_qk_inference_fwd
@@ -139,8 +138,6 @@ class Mamba3(nn.Module):
         Returns: same shape as u
         """
         batch, seqlen, dim = u.shape
-        if cu_seqlens is not None:
-            raise NotImplementedError("Currently does not support varlen in Mamba-3 (MIMO).")
 
         angle_dt_state, ssm_state, k_state, v_state  = None, None, None, None
         if inference_params is not None:
@@ -176,8 +173,8 @@ class Mamba3(nn.Module):
         DT = rearrange(DT, "b l n -> b n l")
         ADT = rearrange(ADT, "b l n -> b n l")
 
-        # Compute angle
-        angles = angles.unsqueeze(-2).expand(-1, -1, self.nheads, -1) # (B, L, N, S)
+        # Compute angle — cast to float32 as required by the MIMO/SISO kernels
+        angles = angles.unsqueeze(-2).expand(-1, -1, self.nheads, -1).to(torch.float32) # (B, L, N, S)
 
         # Apply RMS Norm on B and C
         B = self.B_norm(B)
@@ -185,7 +182,6 @@ class Mamba3(nn.Module):
         
         # Apply Mamba-3 kernel
         if self.is_mimo:
-            angles = angle_dt(angles, DT.transpose(-1, -2)) # (B, L, N, S)
             y = mamba3_mimo_combined(
                 Q=C,
                 K=B,
@@ -205,6 +201,7 @@ class Mamba3(nn.Module):
                 rotary_dim_divisor=self.rotary_dim_divisor,
                 dtype=x.dtype,
                 return_state=ssm_state is not None,
+                cu_seqlens=cu_seqlens,
             )
             if ssm_state is not None:
                 y, last_angle, last_state, last_k, last_v, *rest = y
@@ -236,6 +233,7 @@ class Mamba3(nn.Module):
                 chunk_size=self.chunk_size,
                 Input_States=None,
                 return_final_states=ssm_state is not None,
+                cu_seqlens=cu_seqlens,
             )
             if ssm_state is not None:
                 y, last_angle, last_state, last_k, last_v, *rest = y
