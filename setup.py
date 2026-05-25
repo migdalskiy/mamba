@@ -123,7 +123,7 @@ def check_if_cuda_home_none(global_option: str) -> None:
 
 
 def append_nvcc_threads(nvcc_extra_args):
-    return nvcc_extra_args + ["--threads", "4"]
+    return nvcc_extra_args + ["--threads", str(os.cpu_count())]
 
 
 cmdclass = {}
@@ -166,9 +166,9 @@ if not SKIP_CUDA_BUILD:
 
         if CUDA_HOME is not None:
             _, bare_metal_version = get_cuda_bare_metal_version(CUDA_HOME)
-            if bare_metal_version < Version("11.6"):
+            if bare_metal_version < Version("13.0"):
                 raise RuntimeError(
-                    f"{PACKAGE_NAME} is only supported on CUDA 11.6 and above.  "
+                    f"{PACKAGE_NAME} is only supported on CUDA 13.0 and above.  "
                     "Note: make sure nvcc has a supported version by running nvcc -V."
                 )
 
@@ -178,27 +178,12 @@ if not SKIP_CUDA_BUILD:
         if bare_metal_version.major != torch_cuda_version.major:
             os.environ["TORCH_CUDA_ARCH_LIST"] = ""
 
-        cc_flag.append("-gencode")
-        cc_flag.append("arch=compute_75,code=sm_75")
-        cc_flag.append("-gencode")
-        cc_flag.append("arch=compute_80,code=sm_80")
-        cc_flag.append("-gencode")
-        cc_flag.append("arch=compute_87,code=sm_87")
-        if bare_metal_version >= Version("11.8"):
-            cc_flag.append("-gencode")
-            cc_flag.append("arch=compute_90,code=sm_90")
-        if bare_metal_version >= Version("12.8"):
-            cc_flag.append("-gencode")
-            cc_flag.append("arch=compute_100,code=sm_100")
-            cc_flag.append("-gencode")
-            cc_flag.append("arch=compute_120,code=sm_120")
-        if bare_metal_version >= Version("13.0"):
-            cc_flag.append("-gencode")
-            cc_flag.append("arch=compute_103,code=sm_103")
-            cc_flag.append("-gencode")
-            cc_flag.append("arch=compute_110,code=sm_110")
-            cc_flag.append("-gencode")
-            cc_flag.append("arch=compute_121,code=sm_121")
+        cc_flag += [
+            "-gencode", "arch=compute_80,code=sm_80",  # A100
+            "-gencode", "arch=compute_86,code=sm_86",  # RTX 3090
+            "-gencode", "arch=compute_89,code=sm_89",  # L40S
+            "-gencode", "arch=compute_90,code=sm_90",  # H100/H200
+        ]
 
 
     # HACK: The compiler flag -D_GLIBCXX_USE_CXX11_ABI is set to be the same as
