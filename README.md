@@ -157,6 +157,30 @@ Source: [models/mixer_seq_simple.py](mamba_ssm/models/mixer_seq_simple.py).
 This is an example of how to integrate Mamba into an end-to-end neural network.
 This example is used in the generation scripts below.
 
+### Explainability (MambaLRP)
+
+For language models built from Mamba-2 layers, [MambaLRP](https://arxiv.org/abs/2406.07592) attributes
+one output token to the tokens it was predicted from.
+
+Source: [explain/mamba_lrp.py](mamba_ssm/explain/mamba_lrp.py).
+
+```python
+from mamba_ssm.explain import mamba_lrp
+
+out = model.generate(input_ids, max_length=input_ids.shape[1] + 20)
+output_ids = out[:, input_ids.shape[1]:]  # generated tokens only
+
+attr = mamba_lrp(model, input_ids, output_ids, output_index=5)
+attr.input_relevance   # (batch, n_input) signed relative importance of each input token
+attr.output_relevance  # (batch, 5) importance of the output tokens generated before it
+```
+
+Optional arguments (all accept `None` for the default): `layer` (default: token embeddings; an int `k`
+reads relevance at the residual stream entering block `k`, a list or `"all"` returns several layers),
+`target_token_id` (explain an alternative token's logit), `normalize` (`True`/`"abs_sum"` by default,
+`"max"`, or `None` for raw relevance that sums to the logit) and `chunk_size`.
+The attribution uses a pure PyTorch forward pass, so it also runs on CPU.
+
 
 ## Pretrained Models
 
