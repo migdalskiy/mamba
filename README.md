@@ -159,8 +159,10 @@ This example is used in the generation scripts below.
 
 ### Explainability (MambaLRP)
 
-For language models built from Mamba-2 layers, [MambaLRP](https://arxiv.org/abs/2406.07592) attributes
-one output token to the tokens it was predicted from.
+For language models built from Mamba, Mamba-2 or Mamba-3 layers (SISO and MIMO),
+[MambaLRP](https://arxiv.org/abs/2406.07592) attributes one output token to the tokens it was predicted from.
+The propagation rules for Mamba-2 and Mamba-3 (trapezoidal recurrence, data-dependent rotations, MIMO)
+are derived in the module docstrings.
 
 Source: [explain/mamba_lrp.py](mamba_ssm/explain/mamba_lrp.py).
 
