@@ -25,19 +25,42 @@ with an efficient hardware-aware design and implementation in the spirit of [Fla
 
 ## Installation
 
-Install PyTorch first, then:
-- [Option] `pip install causal-conv1d>=1.4.0 --no-build-isolation`: an efficient implementation of a simple causal Conv1d layer used inside the Mamba block.
-- `pip install mamba-ssm --no-build-isolation`: the core Mamba package.
-- `pip install mamba-ssm[causal-conv1d] --no-build-isolation`: To install core Mamba package and causal-conv1d.
+Install PyTorch first. By default, `mamba-ssm` installs the core package without compiling the
+`selective_scan_cuda` extension and without downloading cached CUDA-enabled wheels.
 
-`--no-build-isolation` is required so that pip uses your existing CUDA-enabled PyTorch instead of installing torch-cpu in an isolated build environment.
+| Install mode | Command | Behavior |
+| --- | --- | --- |
+| Core package | `pip install mamba-ssm --no-build-isolation` | Installs `mamba-ssm` without `selective_scan_cuda` and does not compile CUDA extensions. |
+| Core package plus causal-conv1d | `pip install "mamba-ssm[causal-conv1d]" --no-build-isolation` | Installs the core package and the `causal-conv1d` extra, still without `selective_scan_cuda`. |
+| Force local core package build | `MAMBA_FORCE_BUILD=TRUE pip install mamba-ssm --no-build-isolation` | Builds the default pure Python wheel locally, still without `selective_scan_cuda`. |
+| CUDA selective scan opt-in | `MAMBA_KEEP_CUDA_BUILD=TRUE pip install mamba-ssm --no-build-isolation` | Installs `selective_scan_cuda`; pip first tries a matching prebuilt CUDA/HIP wheel, then compiles locally if no wheel is available. |
+| Force local CUDA selective scan build | `MAMBA_FORCE_BUILD=TRUE MAMBA_KEEP_CUDA_BUILD=TRUE pip install mamba-ssm --no-build-isolation` | Skips cached wheels and compiles `selective_scan_cuda` locally. |
 
-NOTE: To use Mamba-3, please install from source `MAMBA_FORCE_BUILD=TRUE pip install --no-cache-dir --force-reinstall git+https://github.com/state-spaces/mamba.git --no-build-isolation`.
+`--no-build-isolation` is required for CUDA builds so that pip uses your existing CUDA-enabled
+PyTorch instead of installing torch-cpu in an isolated build environment.
 
-Other requirements:
+Source installs use the same defaults and opt-in flags:
+
+| Install mode | Command |
+| --- | --- |
+| Source default, no `selective_scan_cuda` | `pip install . --no-build-isolation` |
+| Source default from GitHub, no `selective_scan_cuda` | `pip install git+https://github.com/state-spaces/mamba.git --no-build-isolation` |
+| Source forced local core build, no `selective_scan_cuda` | `MAMBA_FORCE_BUILD=TRUE pip install . --no-build-isolation` |
+| Source CUDA selective scan opt-in | `MAMBA_KEEP_CUDA_BUILD=TRUE pip install . --no-build-isolation` |
+| Source forced local CUDA selective scan build | `MAMBA_FORCE_BUILD=TRUE MAMBA_KEEP_CUDA_BUILD=TRUE pip install . --no-build-isolation` |
+
+NOTE: To use Mamba-3 from the latest source tree, install from source. For the default source
+install without `selective_scan_cuda`, run `pip install git+https://github.com/state-spaces/mamba.git --no-build-isolation`.
+For the CUDA selective scan extension, add `MAMBA_KEEP_CUDA_BUILD=TRUE`; add
+`MAMBA_FORCE_BUILD=TRUE` as well to force local CUDA compilation.
+
+Core requirements:
 - Linux
-- NVIDIA GPU
+- Python 3.10+
 - PyTorch 1.12+
+
+Additional requirements for CUDA `selective_scan_cuda` builds and GPU execution:
+- NVIDIA GPU
 - CUDA 11.6+
 
 For AMD cards, see additional prerequisites below.
@@ -133,6 +156,32 @@ Source: [models/mixer_seq_simple.py](mamba_ssm/models/mixer_seq_simple.py).
 
 This is an example of how to integrate Mamba into an end-to-end neural network.
 This example is used in the generation scripts below.
+
+### Explainability (MambaLRP)
+
+For language models built from Mamba, Mamba-2 or Mamba-3 layers (SISO and MIMO),
+[MambaLRP](https://arxiv.org/abs/2406.07592) attributes one output token to the tokens it was predicted from.
+The propagation rules for Mamba-2 and Mamba-3 (trapezoidal recurrence, data-dependent rotations, MIMO)
+are derived in the module docstrings.
+
+Source: [explain/mamba_lrp.py](mamba_ssm/explain/mamba_lrp.py).
+
+```python
+from mamba_ssm.explain import mamba_lrp
+
+out = model.generate(input_ids, max_length=input_ids.shape[1] + 20)
+output_ids = out[:, input_ids.shape[1]:]  # generated tokens only
+
+attr = mamba_lrp(model, input_ids, output_ids, output_index=5)
+attr.input_relevance   # (batch, n_input) signed relative importance of each input token
+attr.output_relevance  # (batch, 5) importance of the output tokens generated before it
+```
+
+Optional arguments (all accept `None` for the default): `layer` (default: token embeddings; an int `k`
+reads relevance at the residual stream entering block `k`, a list or `"all"` returns several layers),
+`target_token_id` (explain an alternative token's logit), `normalize` (`True`/`"abs_sum"` by default,
+`"max"`, or `None` for raw relevance that sums to the logit) and `chunk_size`.
+The attribution uses a pure PyTorch forward pass, so it also runs on CPU.
 
 
 ## Pretrained Models
