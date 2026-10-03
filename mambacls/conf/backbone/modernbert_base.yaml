@@ -1,0 +1,6 @@
+kind: hf_seqcls
+name: modernbert_base
+hf_id: answerdotai/ModernBERT-base
+tokenizer: answerdotai/ModernBERT-base
+param_dtype: float32
+max_context: 8192

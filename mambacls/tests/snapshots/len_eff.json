@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": null,
+  "yaxis": null,
+  "zaxis": null
+ },
+ "title": "tokens_per_s vs sequence length",
+ "traces": [
+  {
+   "color": "#2a78d6",
+   "n_x": 2,
+   "n_z": null,
+   "name": "a",
+   "type": "scatter"
+  }
+ ],
+ "xaxis": {
+  "title": "L (tokens)",
+  "type": "log"
+ },
+ "yaxis": {
+  "title": "tokens_per_s",
+  "type": "log"
+ }
+}

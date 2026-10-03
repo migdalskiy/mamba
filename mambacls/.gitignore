@@ -1,0 +1,8 @@
+results/
+report/
+demo_results/
+outputs/
+multirun/
+*.zarr/
+*.duckdb
+__pycache__/

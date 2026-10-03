@@ -1,0 +1,40 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": null,
+  "yaxis": null,
+  "zaxis": null
+ },
+ "title": "Reliability diagram",
+ "traces": [
+  {
+   "color": "#8a8984",
+   "n_x": 2,
+   "n_z": null,
+   "name": "perfect calibration",
+   "type": "scatter"
+  },
+  {
+   "color": "#2a78d6",
+   "n_x": 3,
+   "n_z": null,
+   "name": "model",
+   "type": "scatter"
+  },
+  {
+   "color": "#6da7ec",
+   "n_x": 3,
+   "n_z": null,
+   "name": "examples per bin",
+   "type": "bar"
+  }
+ ],
+ "xaxis": {
+  "title": null,
+  "type": null
+ },
+ "yaxis": {
+  "title": "accuracy",
+  "type": null
+ }
+}

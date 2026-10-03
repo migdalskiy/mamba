@@ -1,0 +1,23 @@
+# @package _global_
+defaults:
+  - override /backbone: mamba3_siso_893m
+  - override /pooler: latent_query
+  - override /adapter: lora
+  - override /data: banking77
+seed: 0
+phase: B
+precision: bf16_amp
+max_len: 512
+batching: {mode: right_pad, bucket_by_length: true, tokens_per_batch: 32768}
+optim: {name: adamw, lr_backbone: 2e-4, lr_head: 1e-3, wd: 0.01,
+        no_decay: [A_log, D, dt_bias, norm, bias], warmup_ratio: 0.06, schedule: cosine, clip: 1.0}
+adapter: {targets: [in_proj, out_proj], r: 16, alpha: 32, dropout: 0.05}
+train: {epochs: 3, grad_ckpt: false, eval_every: 0.25}
+probe: {enabled: true, n_examples: 64, layers: all, what: [resid, dt, state, ssd_matrix], at: [0, 0.25, 0.5, 1.0]}
+tracking: {wandb: true, project: mambacls, store_dir: results/store, duckdb: results/mambacls.duckdb}
+sweep:
+  adapter: [probe, full, lora, sdlora, state_offset, prompt, bidir_tied_gate]
+  backbone: [mamba2_780m, mamba3_siso_893m, mamba3_mimo_894m, modernbert_base, modernbert_large, deberta_v3_base, pythia_410m]
+  data: [sst2, trec, banking77, ag_news, imdb]
+  seed: [0, 1, 2, 3, 4]
+  lr_sweep: {seed: 0, optim.lr_backbone: [5e-5, 1e-4, 2e-4, 5e-4]}

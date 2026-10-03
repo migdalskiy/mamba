@@ -1,0 +1,5 @@
+name: yelp
+revision: null   # pin a dataset commit SHA at ingest
+truncation: head
+append_eos: false
+train_fraction: 0.1

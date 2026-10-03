@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": null,
+  "yaxis": null,
+  "zaxis": null
+ },
+ "title": "Layer 1, head 0: hidden attention M = L \u2218 CB\u1d40",
+ "traces": [
+  {
+   "color": null,
+   "n_x": 6,
+   "n_z": 36,
+   "name": null,
+   "type": "heatmap"
+  }
+ ],
+ "xaxis": {
+  "title": "source position s",
+  "type": null
+ },
+ "yaxis": {
+  "title": "output position t",
+  "type": null
+ }
+}

@@ -1,0 +1,6 @@
+kind: hf_seqcls
+name: deberta_v3_base
+hf_id: microsoft/deberta-v3-base
+tokenizer: microsoft/deberta-v3-base
+param_dtype: float32
+max_context: 512

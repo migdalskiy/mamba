@@ -1,0 +1,23 @@
+defaults:
+  - backbone: mamba2_780m
+  - pooler: last
+  - adapter: lora
+  - data: sst2
+  - _self_
+
+seed: 0
+phase: null
+precision: bf16_amp          # fp32 params, bf16 autocast (CUDA); never pure fp16 weights
+max_len: 512
+probe_mode: cached           # probe adapter + parameter-free pooler: cache features, fit a linear head
+batching: {mode: right_pad, bucket_by_length: true, tokens_per_batch: 32768, max_batch_size: 64}
+optim: {name: adamw, lr_backbone: 2.0e-4, lr_head: 1.0e-3, wd: 0.01,
+        no_decay: [A_log, D, dt_bias, norm, bias], warmup_ratio: 0.06, schedule: cosine, clip: 1.0}
+train: {epochs: 3, grad_ckpt: false, eval_every: 0.25, patience: 2, monitor: macro_f1, probe_epochs: 200}
+head: {hidden: null, dropout: 0.1}
+probe: {enabled: false, n_examples: 64, layers: all, what: [resid, dt, state_norm, ssd_matrix], at: [0, 0.25, 0.5, 1.0], position_stride: 1}
+efficiency: {enabled: false, seq_lens: [128, 512, 2048, 8192], batch_sizes: [1, 32], warmup: 50, iters: 200}
+length_eval: {eval_lengths: [], longmamba: false, train_len: null}
+landscape: {enabled: false, n_batches: 4, span: 1.0, steps: 11}
+tracking: {wandb: false, project: mambacls, store_dir: results/store, artifacts: results/artifacts.zarr,
+           duckdb: results/mambacls.duckdb, save_embeddings: true, n_embeddings: 2000}

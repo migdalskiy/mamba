@@ -1,0 +1,3 @@
+name: prompt
+n_tokens: 16
+init: vocab

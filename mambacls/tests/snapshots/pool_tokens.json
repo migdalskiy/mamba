@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": null,
+  "yaxis": null,
+  "zaxis": null
+ },
+ "title": "Attention-pool weights over tokens",
+ "traces": [
+  {
+   "color": null,
+   "n_x": null,
+   "n_z": 16,
+   "name": null,
+   "type": "heatmap"
+  }
+ ],
+ "xaxis": {
+  "title": null,
+  "type": null
+ },
+ "yaxis": {
+  "title": null,
+  "type": null
+ }
+}

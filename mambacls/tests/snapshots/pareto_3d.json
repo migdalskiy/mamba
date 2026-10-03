@@ -1,0 +1,40 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": "log10 tokens_per_s",
+  "yaxis": "log10 peak_mem_mb",
+  "zaxis": "acc"
+ },
+ "title": "Pareto: accuracy \u00d7 throughput \u00d7 memory",
+ "traces": [
+  {
+   "color": "#2a78d6",
+   "n_x": 2,
+   "n_z": 2,
+   "name": "attn/probe",
+   "type": "scatter3d"
+  },
+  {
+   "color": "#eb6834",
+   "n_x": 2,
+   "n_z": 2,
+   "name": "last/lora",
+   "type": "scatter3d"
+  },
+  {
+   "color": "#1baf7a",
+   "n_x": 2,
+   "n_z": 2,
+   "name": "mean/full",
+   "type": "scatter3d"
+  }
+ ],
+ "xaxis": {
+  "title": null,
+  "type": null
+ },
+ "yaxis": {
+  "title": null,
+  "type": null
+ }
+}

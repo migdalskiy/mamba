@@ -1,0 +1,9 @@
+kind: mamba
+name: mamba2_780m
+hf_id: state-spaces/mamba2-780m
+family: Mamba2
+tokenizer: EleutherAI/gpt-neox-20b
+impl: kernel          # kernel | reference (pure PyTorch, any device)
+param_dtype: float32  # fp32 master weights; bf16 autocast via precision=bf16_amp
+grad_checkpointing: false
+allowed_layers: ["Mamba2"]

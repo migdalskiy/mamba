@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": null,
+  "yaxis": null,
+  "zaxis": null
+ },
+ "title": "Scalar-mix layer weights",
+ "traces": [
+  {
+   "color": "#2a78d6",
+   "n_x": 3,
+   "n_z": null,
+   "name": null,
+   "type": "bar"
+  }
+ ],
+ "xaxis": {
+  "title": "layer",
+  "type": null
+ },
+ "yaxis": {
+  "title": "softmax weight",
+  "type": null
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "n_frames": 3,
+ "scene": {
+  "xaxis": "c1",
+  "yaxis": "c2",
+  "zaxis": "c3"
+ },
+ "title": "Representation evolution across layers (PCA)",
+ "traces": [
+  {
+   "color": "#2a78d6",
+   "n_x": 6,
+   "n_z": 6,
+   "name": "0",
+   "type": "scatter3d"
+  },
+  {
+   "color": "#eb6834",
+   "n_x": 6,
+   "n_z": 6,
+   "name": "1",
+   "type": "scatter3d"
+  }
+ ],
+ "xaxis": {
+  "title": null,
+  "type": null
+ },
+ "yaxis": {
+  "title": null,
+  "type": null
+ }
+}

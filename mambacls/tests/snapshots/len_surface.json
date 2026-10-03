@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": "log2 L_eval",
+  "yaxis": "method",
+  "zaxis": "acc"
+ },
+ "title": "acc \u00d7 sequence length \u00d7 method",
+ "traces": [
+  {
+   "color": null,
+   "n_x": 2,
+   "n_z": 4,
+   "name": null,
+   "type": "surface"
+  }
+ ],
+ "xaxis": {
+  "title": null,
+  "type": null
+ },
+ "yaxis": {
+  "title": null,
+  "type": null
+ }
+}

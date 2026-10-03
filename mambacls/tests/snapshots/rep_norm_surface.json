@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": "position",
+  "yaxis": "layer",
+  "zaxis": "\u2016h\u2016"
+ },
+ "title": "Residual-stream norm: layer \u00d7 position",
+ "traces": [
+  {
+   "color": null,
+   "n_x": 5,
+   "n_z": 15,
+   "name": null,
+   "type": "surface"
+  }
+ ],
+ "xaxis": {
+  "title": null,
+  "type": null
+ },
+ "yaxis": {
+  "title": null,
+  "type": null
+ }
+}

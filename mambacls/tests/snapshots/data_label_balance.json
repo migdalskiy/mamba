@@ -1,0 +1,40 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": null,
+  "yaxis": null,
+  "zaxis": null
+ },
+ "title": "sst2: label balance per split",
+ "traces": [
+  {
+   "color": "#1baf7a",
+   "n_x": 2,
+   "n_z": null,
+   "name": "test",
+   "type": "bar"
+  },
+  {
+   "color": "#2a78d6",
+   "n_x": 2,
+   "n_z": null,
+   "name": "train",
+   "type": "bar"
+  },
+  {
+   "color": "#eb6834",
+   "n_x": 2,
+   "n_z": null,
+   "name": "val",
+   "type": "bar"
+  }
+ ],
+ "xaxis": {
+  "title": "label",
+  "type": "category"
+ },
+ "yaxis": {
+  "title": "examples",
+  "type": null
+ }
+}

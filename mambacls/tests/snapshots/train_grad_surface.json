@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": "step",
+  "yaxis": "layer",
+  "zaxis": "log10 \u2016grad\u2016"
+ },
+ "title": "Layer \u00d7 step \u00d7 gradient norm",
+ "traces": [
+  {
+   "color": null,
+   "n_x": 5,
+   "n_z": 10,
+   "name": null,
+   "type": "surface"
+  }
+ ],
+ "xaxis": {
+  "title": null,
+  "type": null
+ },
+ "yaxis": {
+  "title": null,
+  "type": null
+ }
+}

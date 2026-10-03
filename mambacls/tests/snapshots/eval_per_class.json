@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": null,
+  "yaxis": null,
+  "zaxis": null
+ },
+ "title": "Per-class F1",
+ "traces": [
+  {
+   "color": "#2a78d6",
+   "n_x": 3,
+   "n_z": null,
+   "name": null,
+   "type": "bar"
+  }
+ ],
+ "xaxis": {
+  "title": "F1",
+  "type": null
+ },
+ "yaxis": {
+  "title": "class",
+  "type": "category"
+ }
+}

@@ -1,0 +1,5 @@
+name: lora
+r: 16
+alpha: 32
+dropout: 0.05
+targets: [in_proj, out_proj]

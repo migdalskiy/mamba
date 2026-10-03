@@ -1,0 +1,11 @@
+# @package _global_
+# CPU-sized end-to-end run on a tiny random backbone (no downloads besides the dataset).
+defaults:
+  - override /backbone: tiny_mamba2
+  - override /adapter: lora
+  - override /pooler: mean
+precision: fp32
+max_len: 128
+data: {max_examples: 500, tokenizer: whitespace}
+train: {epochs: 1, eval_every: 0.5}
+adapter: {r: 4}

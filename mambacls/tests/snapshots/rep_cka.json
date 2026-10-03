@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": "layer",
+  "yaxis": "layer",
+  "zaxis": "linear CKA"
+ },
+ "title": "Layer \u00d7 layer linear CKA",
+ "traces": [
+  {
+   "color": null,
+   "n_x": 3,
+   "n_z": 9,
+   "name": null,
+   "type": "surface"
+  }
+ ],
+ "xaxis": {
+  "title": null,
+  "type": null
+ },
+ "yaxis": {
+  "title": null,
+  "type": null
+ }
+}

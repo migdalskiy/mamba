@@ -1,0 +1,6 @@
+kind: hf_seqcls
+name: deberta_v3_large
+hf_id: microsoft/deberta-v3-large
+tokenizer: microsoft/deberta-v3-large
+param_dtype: float32
+max_context: 512

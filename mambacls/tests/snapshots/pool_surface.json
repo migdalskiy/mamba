@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": "position",
+  "yaxis": "example",
+  "zaxis": "pool weight"
+ },
+ "title": "Example \u00d7 position \u00d7 pool weight",
+ "traces": [
+  {
+   "color": null,
+   "n_x": 5,
+   "n_z": 15,
+   "name": null,
+   "type": "surface"
+  }
+ ],
+ "xaxis": {
+  "title": null,
+  "type": null
+ },
+ "yaxis": {
+  "title": null,
+  "type": null
+ }
+}

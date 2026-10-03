@@ -1,0 +1,47 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": null,
+  "yaxis": null,
+  "zaxis": null
+ },
+ "title": "train loss (mean over seeds, 95% band)",
+ "traces": [
+  {
+   "color": null,
+   "n_x": 40,
+   "n_z": null,
+   "name": null,
+   "type": "scatter"
+  },
+  {
+   "color": "#2a78d6",
+   "n_x": 20,
+   "n_z": null,
+   "name": "full",
+   "type": "scatter"
+  },
+  {
+   "color": null,
+   "n_x": 40,
+   "n_z": null,
+   "name": null,
+   "type": "scatter"
+  },
+  {
+   "color": "#eb6834",
+   "n_x": 20,
+   "n_z": null,
+   "name": "lora",
+   "type": "scatter"
+  }
+ ],
+ "xaxis": {
+  "title": "optimizer step",
+  "type": null
+ },
+ "yaxis": {
+  "title": "loss",
+  "type": null
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": null,
+  "yaxis": null,
+  "zaxis": null
+ },
+ "title": "Loss along the init \u2192 final interpolation",
+ "traces": [
+  {
+   "color": "#2a78d6",
+   "n_x": 3,
+   "n_z": null,
+   "name": "a",
+   "type": "scatter"
+  },
+  {
+   "color": "#eb6834",
+   "n_x": 3,
+   "n_z": null,
+   "name": "b",
+   "type": "scatter"
+  }
+ ],
+ "xaxis": {
+  "title": "\u03b1",
+  "type": null
+ },
+ "yaxis": {
+  "title": "loss",
+  "type": null
+ }
+}

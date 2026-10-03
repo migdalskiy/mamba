@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": "log2 L",
+  "yaxis": "log2 batch",
+  "zaxis": "log10 latency_p50_ms"
+ },
+ "title": "Latency \u00d7 sequence length \u00d7 batch size",
+ "traces": [
+  {
+   "color": null,
+   "n_x": 2,
+   "n_z": 4,
+   "name": null,
+   "type": "surface"
+  }
+ ],
+ "xaxis": {
+  "title": null,
+  "type": null
+ },
+ "yaxis": {
+  "title": null,
+  "type": null
+ }
+}

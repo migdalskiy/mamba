@@ -1,0 +1,14 @@
+# @package _global_
+defaults:
+  - override /data: arxiv_cls
+phase: C
+max_len: 4096
+length_eval: {eval_lengths: [512, 1024, 2048, 4096, 8192, 16384], longmamba: true, train_len: 4096}
+efficiency: {enabled: true, seq_lens: [128, 512, 1024, 2048, 4096, 8192, 16384], batch_sizes: [1, 32]}
+sweep:
+  max_len: [1024, 4096]
+  data: [arxiv_cls, hyperpartisan]
+  backbone: [mamba2_780m, mamba3_siso_893m, modernbert_base, deberta_v3_base]
+  seed: [0, 1, 2, 3, 4]
+  overrides_by_backbone:
+    deberta_v3_base: {max_len: 512, data.truncation: head_tail}

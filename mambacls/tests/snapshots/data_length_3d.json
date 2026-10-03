@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": "dataset",
+  "yaxis": "length bucket",
+  "zaxis": "examples"
+ },
+ "title": "Datasets \u00d7 length bucket \u00d7 examples (train)",
+ "traces": [
+  {
+   "color": null,
+   "n_x": 40,
+   "n_z": 40,
+   "name": null,
+   "type": "mesh3d"
+  }
+ ],
+ "xaxis": {
+  "title": null,
+  "type": null
+ },
+ "yaxis": {
+  "title": null,
+  "type": null
+ }
+}

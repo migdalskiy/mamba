@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": null,
+  "yaxis": null,
+  "zaxis": null
+ },
+ "title": "Layer 1: \u0394 = softplus(dt) by position and head",
+ "traces": [
+  {
+   "color": null,
+   "n_x": 10,
+   "n_z": 40,
+   "name": null,
+   "type": "heatmap"
+  }
+ ],
+ "xaxis": {
+  "title": "position",
+  "type": null
+ },
+ "yaxis": {
+  "title": "head",
+  "type": null
+ }
+}

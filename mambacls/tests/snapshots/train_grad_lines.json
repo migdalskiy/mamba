@@ -1,0 +1,40 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": null,
+  "yaxis": null,
+  "zaxis": null
+ },
+ "title": "Gradient norm per layer group",
+ "traces": [
+  {
+   "color": "#2a78d6",
+   "n_x": 5,
+   "n_z": null,
+   "name": "head",
+   "type": "scatter"
+  },
+  {
+   "color": "#eb6834",
+   "n_x": 5,
+   "n_z": null,
+   "name": "layer_000",
+   "type": "scatter"
+  },
+  {
+   "color": "#1baf7a",
+   "n_x": 5,
+   "n_z": null,
+   "name": "layer_001",
+   "type": "scatter"
+  }
+ ],
+ "xaxis": {
+  "title": "step",
+  "type": null
+ },
+ "yaxis": {
+  "title": "\u2016grad\u2016",
+  "type": "log"
+ }
+}

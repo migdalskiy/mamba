@@ -1,0 +1,7 @@
+name: sdlora
+r: 16
+alpha: 32
+dropout: 0.05
+targets: [in_proj, out_proj]
+top_frac: 0.1
+warmup_epochs: 1

@@ -1,0 +1,33 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": null,
+  "yaxis": null,
+  "zaxis": null
+ },
+ "title": "TF-IDF / UMAP of raw texts",
+ "traces": [
+  {
+   "color": "#2a78d6",
+   "n_x": 1,
+   "n_z": 1,
+   "name": "0",
+   "type": "scatter3d"
+  },
+  {
+   "color": "#eb6834",
+   "n_x": 2,
+   "n_z": 2,
+   "name": "1",
+   "type": "scatter3d"
+  }
+ ],
+ "xaxis": {
+  "title": null,
+  "type": null
+ },
+ "yaxis": {
+  "title": null,
+  "type": null
+ }
+}

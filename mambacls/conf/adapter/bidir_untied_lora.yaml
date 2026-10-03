@@ -1,0 +1,3 @@
+name: bidir
+mode: untied_lora
+lora_kwargs: {r: 16, alpha: 32, dropout: 0.05, targets: [in_proj, out_proj]}

@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": "predicted",
+  "yaxis": "true",
+  "zaxis": "count"
+ },
+ "title": "Confusion towers",
+ "traces": [
+  {
+   "color": null,
+   "n_x": 32,
+   "n_z": 32,
+   "name": null,
+   "type": "mesh3d"
+  }
+ ],
+ "xaxis": {
+  "title": null,
+  "type": null
+ },
+ "yaxis": {
+  "title": null,
+  "type": null
+ }
+}

@@ -1,0 +1,4 @@
+name: banking77
+revision: null   # pin a dataset commit SHA at ingest
+truncation: head
+append_eos: false

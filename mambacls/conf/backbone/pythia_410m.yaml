@@ -1,0 +1,5 @@
+kind: hf_causal
+name: pythia_410m
+hf_id: EleutherAI/pythia-410m
+tokenizer: EleutherAI/pythia-410m
+param_dtype: float32

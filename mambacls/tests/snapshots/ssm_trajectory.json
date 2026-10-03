@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": "PC1",
+  "yaxis": "PC2",
+  "zaxis": "PC3"
+ },
+ "title": "Layer 0, head 1: state trajectory (PCA of h_t)",
+ "traces": [
+  {
+   "color": null,
+   "n_x": 10,
+   "n_z": 10,
+   "name": null,
+   "type": "scatter3d"
+  }
+ ],
+ "xaxis": {
+  "title": null,
+  "type": null
+ },
+ "yaxis": {
+  "title": null,
+  "type": null
+ }
+}

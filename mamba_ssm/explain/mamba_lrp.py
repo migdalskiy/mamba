@@ -160,6 +160,12 @@ def _rms_norm_lrp(x, weight, bias, eps, group_size=None):
     return out
 
 
+def _rms_norm_ref(x, weight, bias, eps):
+    """Plain RMSNorm (no LRP rule); used for tensors that only enter the mixing weights."""
+    out = x * torch.rsqrt(x.square().mean(dim=-1, keepdim=True) + eps) * weight.float()
+    return out + bias.float() if bias is not None else out
+
+
 def _norm_lrp(x, norm):
     """Block / final norm (nn.LayerNorm or RMSNorm) with 1/std detached."""
     if isinstance(norm, nn.LayerNorm):
@@ -180,7 +186,7 @@ def _norm_lrp(x, norm):
 # Linear sequence mixers with fixed (detached) mixing weights
 # ----------------------------------------------------------------------------------------------
 
-def _chunked_linear_attention(q, k, v, log_decay, chunk_size):
+def _chunked_linear_attention(q, k, v, log_decay, chunk_size, detach=True, initial_state=None):
     """Causal linear attention with scalar per-head decay and fixed q, k and decay.
 
         y[t, R] = sum_{s <= t} exp(sum_{u=s+1..t} log_decay[u]) sum_r (q[t, R] . k[s, r]) v[s, r]
@@ -188,10 +194,13 @@ def _chunked_linear_attention(q, k, v, log_decay, chunk_size):
     This is the SSD algorithm of Mamba-2 (``ssd_minimal_discrete``), generalised to the MIMO
     rank dimension of Mamba-3, where all ranks at one time step read the same state.
     q, k: (batch, seqlen, rank, nheads, dstate); v: (batch, seqlen, rank, nheads, headdim);
-    log_decay: (batch, seqlen, nheads). q, k and log_decay are detached, so y is linear in v.
+    log_decay: (batch, seqlen, nheads). With ``detach`` (the LRP rule) q, k and log_decay are
+    detached, so y is linear in v; ``detach=False`` gives the plain, fully differentiable scan.
+    initial_state: optional (batch, nheads, headdim, dstate) state before the first step.
     Returns (batch, seqlen, rank, nheads, headdim).
     """
-    q, k, log_decay = q.detach(), k.detach(), log_decay.detach()
+    if detach:
+        q, k, log_decay = q.detach(), k.detach(), log_decay.detach()
     seqlen = v.shape[1]
     chunk_size = min(chunk_size, seqlen)
     pad = (-seqlen) % chunk_size
@@ -209,7 +218,8 @@ def _chunked_linear_attention(q, k, v, log_decay, chunk_size):
     decay_states = torch.exp(a_cumsum[..., -1:] - a_cumsum)
     states = torch.einsum("bcsrhn,bhcs,bcsrhp->bchpn", k, decay_states, v)
     # 3. Pass states between chunks.
-    states = torch.cat([torch.zeros_like(states[:, :1]), states], dim=1)
+    init = torch.zeros_like(states[:, :1]) if initial_state is None else initial_state[:, None].to(states)
+    states = torch.cat([init, states], dim=1)
     decay_chunk = torch.exp(segsum(F.pad(a_cumsum[..., -1], (1, 0))))
     states = torch.einsum("bhzc,bchpn->bzhpn", decay_chunk, states)[:, :-1]
     # 4. Contribution of earlier chunks.
@@ -357,6 +367,46 @@ def _rotate(x, cos, sin, pairwise):
     return torch.cat([x0 * cos - x1 * sin, x0 * sin + x1 * cos], dim=-1)
 
 
+def _mamba3_routing(mixer: Mamba3, B, C, dd_dt, dd_A, trap, angles):
+    """Selection parameters of a Mamba3 layer, from the raw ``in_proj`` slices.
+
+    Returns a dict with q, k (b, l, r, h, n; normed, biased, rotated), k_scaled (k times the
+    trapezoidal coefficient gamma_s + (1 - lam_{s+1}) dt_{s+1}), diag (b, l, R, r, h; the
+    look-ahead correction at s = t), log_decay = A * dt, dt, A, lam and theta (rotation angles).
+    Differentiable; ``_mamba3_lrp`` calls it under ``torch.no_grad``.
+    """
+    nheads, d_state = mixer.nheads, mixer.d_state
+    rank, ngroups = mixer.mimo_rank, mixer.num_bc_heads
+    B = rearrange(B, "b l (r g n) -> b l r g n", r=rank, g=ngroups)
+    C = rearrange(C, "b l (r g n) -> b l r g n", r=rank, g=ngroups)
+    B = _rms_norm_ref(B, mixer.B_norm.weight, mixer.B_norm.bias, mixer.B_norm.eps)
+    C = _rms_norm_ref(C, mixer.C_norm.weight, mixer.C_norm.bias, mixer.C_norm.eps)
+    B = repeat(B, "b l r g n -> b l r (g j) n", j=nheads // ngroups)
+    C = repeat(C, "b l r g n -> b l r (g j) n", j=nheads // ngroups)
+    B = B + rearrange(mixer.B_bias.float(), "h r n -> r h n")
+    C = C + rearrange(mixer.C_bias.float(), "h r n -> r h n")
+
+    A = torch.clamp(-heavy_tail_activation(dd_A), max=-mixer.A_floor)  # (b, l, h)
+    dt = F.softplus(dd_dt + mixer.dt_bias.float())  # (b, l, h)
+    lam = torch.sigmoid(trap)  # (b, l, h)
+    # Accumulate in float64; only cos / sin of theta are used, which are 2 pi periodic.
+    theta = torch.cumsum(
+        torch.tanh(angles)[:, :, None, :].double() * math.pi * dt[..., None].double(), dim=1
+    ).remainder(2 * math.pi).float()  # (b, l, h, num_rope_angles)
+    pad = d_state // 2 - theta.shape[-1]
+    cos = F.pad(torch.cos(theta), (0, pad), value=1.0)[:, :, None]
+    sin = F.pad(torch.sin(theta), (0, pad), value=0.0)[:, :, None]
+    q = _rotate(C, cos, sin, pairwise=not mixer.is_mimo)
+    k = _rotate(B, cos, sin, pairwise=not mixer.is_mimo)
+
+    gamma = lam * dt
+    lookahead = F.pad((dt * (1 - lam))[:, 1:], (0, 0, 0, 1))  # (1 - lam_{t+1}) dt_{t+1}
+    k_scaled = k * (gamma + lookahead)[:, :, None, :, None]
+    # At s = t only gamma_t applies: remove the look-ahead part from the diagonal.
+    diag = torch.einsum("blRhn,blrhn->blRrh", q, k) * lookahead[:, :, None, None, :]
+    return dict(q=q, k=k, k_scaled=k_scaled, diag=diag, log_decay=A * dt, dt=dt, A=A, lam=lam, theta=theta)
+
+
 def _mamba3_lrp(mixer: Mamba3, u, chunk_size=None):
     """Modified ``Mamba3.forward`` (SISO and MIMO).
 
@@ -419,40 +469,15 @@ def _mamba3_lrp(mixer: Mamba3, u, chunk_size=None):
 
     # Mixing weights W (selection parameters): computed exactly as the model does, then fixed.
     with torch.no_grad():
-        B = rearrange(B, "b l (r g n) -> b l r g n", r=rank, g=ngroups)
-        C = rearrange(C, "b l (r g n) -> b l r g n", r=rank, g=ngroups)
-        B = _rms_norm_lrp(B, mixer.B_norm.weight, mixer.B_norm.bias, mixer.B_norm.eps)
-        C = _rms_norm_lrp(C, mixer.C_norm.weight, mixer.C_norm.bias, mixer.C_norm.eps)
-        B = repeat(B, "b l r g n -> b l r (g j) n", j=nheads // ngroups)
-        C = repeat(C, "b l r g n -> b l r (g j) n", j=nheads // ngroups)
-        B = B + rearrange(mixer.B_bias.float(), "h r n -> r h n")
-        C = C + rearrange(mixer.C_bias.float(), "h r n -> r h n")
-
-        A = torch.clamp(-heavy_tail_activation(dd_A), max=-mixer.A_floor)  # (b, l, h)
-        dt = F.softplus(dd_dt + mixer.dt_bias.float())  # (b, l, h)
-        lam = torch.sigmoid(trap)  # (b, l, h)
-        theta = torch.cumsum(
-            torch.tanh(angles)[:, :, None, :].double() * math.pi * dt[..., None].double(), dim=1
-        ).remainder(2 * math.pi).float()  # (b, l, h, num_rope_angles)
-        pad = d_state // 2 - theta.shape[-1]
-        cos = F.pad(torch.cos(theta), (0, pad), value=1.0)[:, :, None]
-        sin = F.pad(torch.sin(theta), (0, pad), value=0.0)[:, :, None]
-        q = _rotate(C, cos, sin, pairwise=not mixer.is_mimo)
-        k = _rotate(B, cos, sin, pairwise=not mixer.is_mimo)
-
-        gamma = lam * dt
-        lookahead = F.pad((dt * (1 - lam))[:, 1:], (0, 0, 0, 1))  # (1 - lam_{t+1}) dt_{t+1}
-        k_scaled = k * (gamma + lookahead)[:, :, None, :, None]
-        # At s = t only gamma_t applies: remove the look-ahead part from the diagonal.
-        diag = torch.einsum("blRhn,blrhn->blRrh", q, k) * lookahead[:, :, None, None, :]
+        routing = _mamba3_routing(mixer, B, C, dd_dt, dd_A, trap, angles)
 
     if mixer.is_mimo:
         v = torch.einsum("blhp,hrp->blrhp", x, mixer.mimo_x.float())
         zr = torch.einsum("blhp,hrp->blrhp", z, mixer.mimo_z.float())
     else:
         v, zr = x.unsqueeze(2), z.unsqueeze(2)
-    y = _chunked_linear_attention(q, k_scaled, v, A * dt, chunk_size)
-    y = y - torch.einsum("blRrh,blrhp->blRhp", diag, v)
+    y = _chunked_linear_attention(routing["q"], routing["k_scaled"], v, routing["log_decay"], chunk_size)
+    y = y - torch.einsum("blRrh,blrhp->blRhp", routing["diag"], v)
     y = y + v * mixer.D.float()[:, None]
 
     gate = _silu_lrp(zr)

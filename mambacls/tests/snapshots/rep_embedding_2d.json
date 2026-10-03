@@ -1,0 +1,40 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": null,
+  "yaxis": null,
+  "zaxis": null
+ },
+ "title": "Pooled embeddings (PCA), coloured by label",
+ "traces": [
+  {
+   "color": "#2a78d6",
+   "n_x": 10,
+   "n_z": null,
+   "name": "0",
+   "type": "scatter"
+  },
+  {
+   "color": "#eb6834",
+   "n_x": 10,
+   "n_z": null,
+   "name": "1",
+   "type": "scatter"
+  },
+  {
+   "color": "#1baf7a",
+   "n_x": 10,
+   "n_z": null,
+   "name": "2",
+   "type": "scatter"
+  }
+ ],
+ "xaxis": {
+  "title": "pca 1",
+  "type": null
+ },
+ "yaxis": {
+  "title": "pca 2",
+  "type": null
+ }
+}

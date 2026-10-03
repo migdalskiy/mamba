@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": null,
+  "yaxis": null,
+  "zaxis": null
+ },
+ "title": "% of examples truncated at max length L",
+ "traces": [
+  {
+   "color": "#2a78d6",
+   "n_x": 3,
+   "n_z": null,
+   "name": "imdb \u00b7 a",
+   "type": "scatter"
+  }
+ ],
+ "xaxis": {
+  "title": "L (tokens)",
+  "type": "log"
+ },
+ "yaxis": {
+  "title": "% truncated",
+  "type": null
+ }
+}

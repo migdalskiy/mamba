@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": "GPT-NeoX tokens",
+  "yaxis": "ModernBERT tokens",
+  "zaxis": "examples"
+ },
+ "title": "Length under GPT-NeoX \u00d7 ModernBERT",
+ "traces": [
+  {
+   "color": null,
+   "n_x": 10,
+   "n_z": 100,
+   "name": null,
+   "type": "surface"
+  }
+ ],
+ "xaxis": {
+  "title": null,
+  "type": null
+ },
+ "yaxis": {
+  "title": null,
+  "type": null
+ }
+}

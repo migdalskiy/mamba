@@ -1,0 +1,8 @@
+kind: mamba
+name: tiny_mamba3
+family: Mamba3
+tokenizer: whitespace
+impl: reference
+param_dtype: float32
+config: {d_model: 64, n_layer: 2, vocab_size: 50280, fused_add_norm: false,
+         ssm_cfg: {layer: Mamba3, d_state: 16, headdim: 16, chunk_size: 16}}

@@ -1,0 +1,9 @@
+# @package _global_
+defaults:
+  - override /adapter: lora
+phase: D
+adapter: {r: 16, alpha: 32, targets: [in_proj, out_proj]}   # MHA layers in mamba_ssm also name these in_proj / out_proj
+sweep:
+  backbone: [mamba2_2_7b, mamba2attn_2_7b, transformerpp_2_7b]
+  data: [imdb, ag_news, arxiv_cls]
+  seed: [0, 1, 2, 3, 4]

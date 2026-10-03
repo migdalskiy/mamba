@@ -1,0 +1,4 @@
+name: latent_query
+n_queries: 16
+n_heads: 4
+mlp_ratio: 2

@@ -1,0 +1,3 @@
+name: scalar_mix
+base: mean
+layer_norm: false

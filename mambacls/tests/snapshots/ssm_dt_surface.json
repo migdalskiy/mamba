@@ -1,0 +1,26 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": "position",
+  "yaxis": "head",
+  "zaxis": "\u0394"
+ },
+ "title": "Layer 0: position \u00d7 head \u00d7 \u0394",
+ "traces": [
+  {
+   "color": null,
+   "n_x": 6,
+   "n_z": 18,
+   "name": null,
+   "type": "surface"
+  }
+ ],
+ "xaxis": {
+  "title": null,
+  "type": null
+ },
+ "yaxis": {
+  "title": null,
+  "type": null
+ }
+}

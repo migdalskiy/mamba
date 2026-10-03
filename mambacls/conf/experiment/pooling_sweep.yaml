@@ -1,0 +1,13 @@
+# @package _global_
+defaults:
+  - override /adapter: probe
+  - override /data: sst2
+phase: A
+probe_mode: cached
+sweep:
+  pooler: [last, mean, max, attn, latent_query, eos_cls, scalar_mix]
+  backbone: [mamba2_130m, mamba2_370m, mamba2_780m, mamba2_1_3b, mamba2_2_7b,
+             mamba3_siso_187m, mamba3_siso_443m, mamba3_siso_893m, mamba3_siso_1_5b,
+             mamba3_mimo_187m, mamba3_mimo_444m, mamba3_mimo_894m, mamba3_mimo_1_5b]
+  data: [sst2, banking77, ag_news, imdb]
+  seed: [0, 1, 2, 3, 4]

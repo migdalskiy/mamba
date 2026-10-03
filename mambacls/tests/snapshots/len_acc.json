@@ -1,0 +1,33 @@
+{
+ "n_frames": 0,
+ "scene": {
+  "xaxis": null,
+  "yaxis": null,
+  "zaxis": null
+ },
+ "title": "acc vs evaluation length",
+ "traces": [
+  {
+   "color": "#2a78d6",
+   "n_x": 2,
+   "n_z": null,
+   "name": "a",
+   "type": "scatter"
+  },
+  {
+   "color": "#eb6834",
+   "n_x": 2,
+   "n_z": null,
+   "name": "b",
+   "type": "scatter"
+  }
+ ],
+ "xaxis": {
+  "title": "L_eval (tokens)",
+  "type": "log"
+ },
+ "yaxis": {
+  "title": "acc",
+  "type": null
+ }
+}
